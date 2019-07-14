@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Color Picker</title>
+
+    <style>
+        .wrapper {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 1em;
+            grid-auto-rows: 200px;
+        
+
+        }
+        #wrap:hover {
+            -webkit-text-fill-color:rgba(0,0,0,0);
+        }
+    </style>
+
+    <link rel="icon" href="images/favicon.png" />
+</head>
+
+<body class="wrapper">
+    <style>
+        body {
+            background-color: rgb(185, 180, 190);
+        }
+    </style>
+    <script src="js/jquery-3.4.1.min.js"></script>
+
+
+    <script>
+        $(function () {
+
+            function getContrastYIQ(hexcolor) {
+                hexcolor = hexcolor.replace("#", "");
+                var r = parseInt(hexcolor.substr(0, 2), 16);
+                var g = parseInt(hexcolor.substr(2, 2), 16);
+                var b = parseInt(hexcolor.substr(4, 2), 16);
+                var yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+                return (yiq >= 128) ? 'black' : 'white';
+            }
+
+            function buildGrid(color) {
+                for (var c in color) {
+                    var newElement = document.createElement('div');
+                    newElement.innerHTML = color[c]["name"] + '<br>' + color[c]["html"] + '<br>' + color[c]["rgb"];
+                    newElement.id = "wrap";
+                    newElement.style.backgroundColor = color[c]['html'];
+                    newElement.style.textAlign = "center";
+                    newElement.style.fontWeight = "bold";
+                    newElement.style.textTransform = "uppercase";
+                    newElement.style.paddingTop = "70px";
+                    newElement.style.border = "thick solid #000000";
+                    newElement.style.color = getContrastYIQ(color[c]["html"]);
+                    newElement.style.borderRadius = "15px 50px 30px";
+                    newElement.style.boxShadow = "5px 7px rgba(0,0,0,1)";
+                    
+                    //newElement.style.
+                    document.body.appendChild(newElement);
+
+
+                }
+            }
+
+            $.get("colors.json")
+                .done(function (data) {
+                    buildGrid(data);
+                });
+        });
+    </script>
+
+</body>
+
+</html>
