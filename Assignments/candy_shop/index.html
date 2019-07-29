@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="images/favicon.png" />
+    <link rel="stylesheet" href="css/side-menu.css">
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-"
+        crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
+
+    <title>Candy</title>
+
+    <style>
+        .main {
+            z-index: 9000;
+        }
+
+        body {
+            background-color: #0000001a;
+        }
+
+        .wrapper {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-gap: 40px;
+            grid-auto-rows: 1fr;
+
+        }
+        .pure-button{
+            background-color: #dfdbdb;
+            border: thin solid #000000;
+        }
+        #wrap {
+
+            background-color: #ffffff;
+            justify-items: center;
+            text-align: center;
+            font-weight: bold;
+            padding: 50px;
+            border: thin solid #000000;
+            border-radius: 10px;
+            box-shadow: 5px 7px rgba(0, 0, 0, 0);
+        }
+
+        #wrap:hover {
+            -webkit-text-fill-color: rgb(0, 0, 0);
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="pure-menu pure-menu-horizontal pure-menu-scrollable">
+        <a href="#" onclick="homecall()" class="pure-menu-link pure-menu-heading">Candy</a>
+        <input class="pure-form" id='mySearch' type="search" placeholder="Search">
+        <button class="pure-button" id="search" type="submit">Search</button>
+    </div>
+    <div id="main">
+        <div class="header">
+            <h1>Candy Shop</h1>
+            <h2>Search for keyword and search by category work, next currently does not work.</h2>
+
+        </div>
+
+        <div class="content">
+            <div class="pure-g">
+                <div class="pure-u-1-4">
+                    <img class="pure-img-responsive" src="http://167.99.13.118/candy_store/images/candy10.jpg">
+                </div>
+                <div class="pure-u-1-4">
+                    <img class="pure-img-responsive" src="http://167.99.13.118/candy_store/images/candy11.jpg">
+                </div>
+                <div class="pure-u-1-4">
+                    <img class="pure-img-responsive" src="http://167.99.13.118/candy_store/images/candy12.jpg">
+                </div>
+                <div class="pure-u-1-4">
+                    <img class="pure-img-responsive" src="http://167.99.13.118/candy_store/images/candy13.jpg">
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <button class="pure-button" id="next" data-start="10" data-chunk="10">Next</button>
+    <script src="js/jquery-3.4.1.min.js"></script>
+
+
+    <script>
+        $("#next").on("click", function (event) {
+            var start = $(this).data("start");
+            var chunk = $(this).data("chunk");
+            var url = "http://167.99.13.118/candy_store/api?route=candy&max=3.99&column=price";
+            getData(url, start, chunk)
+        });
+
+
+        function getData(url, start, chunk) {
+            let geturl = url + '&start=' + start + '&chunk=' + chunk
+            $.get(geturl)
+                .done(function (data) {
+                    console.log(data);
+                });
+        }
+        //resets grid area when CANDY button is pushed
+        function homecall() {
+            $("div").remove(".wrapper");
+            event.preventDefault();
+        }
+        //build grid are with candy data
+        function buildGrid(candy) {
+            for (var s in candy["data"]) {
+                var newElement = document.createElement('div');
+                newElement.innerHTML = '<img src="http://167.99.13.118/candy_store/images/' + candy["data"][s]["local_image"] + '" style="width:200px;height:200px;">' + '<br>' + candy["data"][s]["title"] + '<br>' + 'Price: $' + candy["data"][s]["price"];
+                newElement.className = "wrapper";
+                newElement.id = "wrap";
+                document.body.appendChild(newElement);
+
+
+            }
+        }
+        //click category words
+        function clickcat(wordss) {
+            $("div").remove(".wrapper");
+            //$("#next").data("start", 0);
+            event.preventDefault();
+
+            var key = wordss.replace(' ', '-');
+            key = key.toLowerCase();
+
+            $.get("http://167.99.13.118/candy_store/api?route=candy&column=category&keyword=" + key + "&start=10" + "&chunk=10")
+                .done(function (data) {
+                    buildGrid(data);
+                });
+        }
+
+        $(function () {
+            // search button click event
+            $("#search").click(function (event) {
+                $("div").remove(".wrapper");
+                event.preventDefault();
+
+                var key = $("#mySearch").val();
+
+                key = "%" + key + "%";
+                $.get("http://167.99.13.118/candy_store/api?route=candy&column=title&keyword=" + key + "&start=10" + "&chunk=10")
+                    .done(function (data) {
+                        buildGrid(data);
+                    });
+            });
+            //build categories in top menu
+            function buildCategory(categories) {
+                for (var i = 0; i < categories["data"].length; i++) {
+                    var cat = '<button class="pure-button" id="cats" type="submit" onclick="clickcat($(this).text())" value="' + categories["data"][i] + '">' + categories["data"][i] + '</button>';
+                    $('.pure-menu').append(cat);
+                }
+            }
+            //get categories
+            $.get("http://167.99.13.118/candy_store/api?route=categories")
+                .done(function (data) {
+                    buildCategory(data)
+                });
+        });
+    </script>
+
+
+    <script src="js/ui.js"></script>
+</body>
+
+
+
+</html>
